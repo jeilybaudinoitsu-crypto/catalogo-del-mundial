@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundial Play | Catálogo Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fifa-blue: #0047AB;
+            --stadium-red: #E20613;
+            --deep-black: #050505;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--deep-black); color: white; }
+        .netflix-gradient { background: linear-gradient(to top, var(--deep-black) 0%, transparent 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: scale(1.05); z-index: 10; border-color: var(--stadium-red); }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: var(--stadium-red); border-radius: 4px; }
+
+        .active-filter { background-color: var(--stadium-red) !important; color: white !important; }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <nav id="navbar" class="fixed top-0 w-full z-[100] transition-colors duration-500 px-6 md:px-12 py-4 flex items-center justify-between bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div class="flex items-center gap-8">
+            <h1 class="text-2xl font-black text-red-600 tracking-tighter uppercase italic">Mundial<span class="text-blue-600">Play</span></h1>
+            <ul class="hidden md:flex gap-6 text-sm font-medium text-gray-300">
+                <li class="hover:text-white cursor-pointer transition">Inicio</li>
+                <li class="text-white border-b-2 border-red-600">Catálogo</li>
+                <li class="hover:text-white cursor-pointer transition flex items-center gap-1">
+                    Mi Lista <span id="watchlist-count" class="bg-blue-600 text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="flex items-center gap-4 bg-zinc-900/80 px-4 py-2 rounded-full border border-zinc-700">
+            <span class="text-gray-400">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar..." class="bg-transparent border-none outline-none text-sm w-24 md:w-48 text-white">
+        </div>
+    </nav>
+
+    <header class="relative h-[50vh] w-full flex items-center px-8 md:px-16 pt-20">
+        <div class="absolute inset-0 z-0">
+            <img src="https://placehold.co/1920x1080/111/fff?text=Copa+del+Mundo+2026" alt="Hero" class="w-full h-full object-cover opacity-40">
+            <div class="absolute inset-0 netflix-gradient"></div>
+        </div>
+        <div class="relative z-10 max-w-2xl mt-10">
+            <h2 class="text-4xl md:text-6xl font-black mb-4 leading-tight">EXPLORA LA<br>HISTORIA</h2>
+            <p class="text-gray-400 text-sm md:text-base">Filtra, busca y guarda tus momentos favoritos del torneo más grande del mundo.</p>
+        </div>
+    </header>
+
+    <main class="relative z-20 px-6 md:px-12 -mt-10">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 bg-zinc-900/50 p-6 rounded-2xl border border-white/5 backdrop-blur-xl">
+            <!-- Categorías -->
+            <div id="category-filters" class="flex flex-wrap gap-2">
+                <button class="filter-btn active-filter px-4 py-1.5 rounded-full text-xs font-bold bg-zinc-800 text-gray-300 hover:bg-zinc-700 transition" data-cat="Todos">Todos</button>
+                <button class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-zinc-800 text-gray-300 hover:bg-zinc-700 transition" data-cat="Partido">Partidos</button>
+                <button class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-zinc-800 text-gray-300 hover:bg-zinc-700 transition" data-cat="Documental">Documentales</button>
+                <button class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-zinc-800 text-gray-300 hover:bg-zinc-700 transition" data-cat="Resumen">Resúmenes</button>
+            </div>
+
+            <!-- Ordenamiento -->
+            <div class="flex items-center gap-3">
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest">Ordenar por:</label>
+                <select id="sort-select" class="bg-zinc-800 text-white text-xs rounded-lg px-3 py-2 outline-none border border-zinc-700 focus:border-red-600 transition">
+                    <option value="newest">Más Recientes</option>
+                    <option value="oldest">Más Antiguos</option>
+                    <option value="az">Título (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
+        <section class="mb-20">
+            <div id="main-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <!-- Inyectado dinámicamente -->
+            </div>
+        </section>
+    </main>
+
+    <div id="detail-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="closeModal()"></div>
+        <div class="relative bg-zinc-900 w-full max-w-2xl rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
+            <div id="modal-body">
+                <!-- Inyectado dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DATA = [
+            { id: 1, title: "Final: Argentina vs Francia", year: 2022, category: "Partido", narrator: "Andrés Cantor", rating: 5, desc: "El partido más épico de la historia.", thumb: "https://placehold.co/600x400/0047AB/ffffff?text=ARG+3-3+FRA" },
+            { id: 2, title: "Marruecos: Sueño Africano", year: 2022, category: "Documental", narrator: "FIFA Films", rating: 4.8, desc: "La hazaña del primer equipo africano en semis.", thumb: "https://placehold.co/600x400/E20613/ffffff?text=Marruecos+2022" },
+            { id: 3, title: "Goles de Pelé", year: 1970, category: "Resumen", narrator: "Archivo Histórico", rating: 5, desc: "Los mejores momentos de O Rei en México 70.", thumb: "https://placehold.co/600x400/222/ffffff?text=Pele+1970" },
+            { id: 4, title: "España: El Tiquitaca", year: 2010, category: "Documental", narrator: "Iker Casillas", rating: 4.7, desc: "Cómo España dominó el mundo en Sudáfrica.", thumb: "https://placehold.co/600x400/E20613/ffffff?text=España+2010" },
+            { id: 5, title: "Brasil vs Alemania", year: 2014, category: "Partido", narrator: "Mariano Closs", rating: 4.5, desc: "El histórico 7-1 que sacudió al mundo.", thumb: "https://placehold.co/600x400/0047AB/ffffff?text=BRA+1-7+GER" },
+            { id: 6, title: "Top Goles Qatar", year: 2022, category: "Resumen", narrator: "Varios", rating: 4.9, desc: "Los 10 mejores goles del último mundial.", thumb: "https://placehold.co/600x400/333/ffffff?text=Top+Goles+22" }
+        ];
+
+        let currentCategory = "Todos";
+        let searchTerm = "";
+        let sortBy = "newest";
+        let watchlist = JSON.parse(localStorage.getItem('mundialPlayWatchlist')) || [];
+
+        function render() {
+            const grid = document.getElementById('main-grid');
+            let filtered = DATA.filter(item => {
+                const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesCat = currentCategory === "Todos" || item.category === currentCategory;
+                return matchesSearch && matchesCat;
+            });
+
+            // Ordenamiento
+            if (sortBy === "az") filtered.sort((a, b) => a.title.localeCompare(b.title));
+            if (sortBy === "newest") filtered.sort((a, b) => b.year - a.year);
+            if (sortBy === "oldest") filtered.sort((a, b) => a.year - b.year);
+
+            grid.innerHTML = filtered.map(item => {
+                const inList = watchlist.includes(item.id);
+                return `
+                <div class="card-hover bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 group cursor-pointer" onclick="openModal(${item.id})">
+                    <div class="relative aspect-video">
+                        <img src="${item.thumb}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-white text-3xl">▶</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-sm truncate w-4/5">${item.title}</h3>
+                            <span class="text-[10px] text-green-500 font-bold">${item.year}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-zinc-500 uppercase font-black">${item.category}</span>
+                            <button onclick="event.stopPropagation(); toggleWatchlist(${item.id})" class="text-lg">
+                                ${inList ? '❤️' : '🤍'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center text-zinc-500 py-20">No se encontraron resultados...</p>`;
+            }
+
+            document.getElementById('watchlist-count').innerText = watchlist.length;
+        }
+
+        function toggleWatchlist(id) {
+            if (watchlist.includes(id)) {
+                watchlist = watchlist.filter(item => item !== id);
+            } else {
+                watchlist.push(id);
+            }
+            localStorage.setItem('mundialPlayWatchlist', JSON.stringify(watchlist));
+            render();
+        }
+
+        function openModal(id) {
+            const item = DATA.find(i => i.id === id);
+            const inList = watchlist.includes(item.id);
+            const modal = document.getElementById('detail-modal');
+            const body = document.getElementById('modal-body');
+
+            body.innerHTML = `
+                <img src="${item.thumb}" class="w-full h-64 object-cover">
+                <div class="p-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-3xl font-black">${item.title}</h2>
+                        <button onclick="toggleWatchlist(${item.id}); openModal(${item.id})" class="bg-zinc-800 p-3 rounded-full hover:bg-zinc-700 transition">
+                            ${inList ? '❤️ Quitar de la lista' : '🤍 Ver más tarde'}
+                        </button>
+                    </div>
+                    <div class="flex gap-4 text-sm mb-6 text-zinc-400">
+                        <span class="text-green-500 font-bold">${item.year}</span>
+                        <span class="border border-zinc-700 px-2 py-0.5 rounded text-xs">${item.category}</span>
+                        <span>⭐ ${item.rating}</span>
+                    </div>
+                    <p class="text-gray-300 mb-6 leading-relaxed">${item.desc}</p>
+                    <p class="text-xs text-zinc-500 uppercase tracking-tighter font-bold">Narrador: ${item.narrator}</p>
+                    <button onclick="closeModal()" class="mt-8 w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition">Regresar</button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            render();
+        });
+
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            render();
+        });
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter'));
+                btn.classList.add('active-filter');
+                currentCategory = btn.dataset.cat;
+                render();
+            });
+        });
+
+        window.onload = render;
+    </script>
+</body>
+</html>
