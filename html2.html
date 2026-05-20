@@ -1,0 +1,93 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundial Play | Catálogo de Leyendas</title>
+    <!-- Tailwind CSS (Framework CSS vía CDN) -->
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap)" rel="stylesheet">
+    <!-- Vinculación de nuestros estilos personalizados externos -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <!-- Navegación optimizada -->
+    <nav id="navbar" class="fixed top-0 w-full z-[100] transition-all duration-300 px-6 md:px-12 py-4 flex items-center justify-between bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div class="flex items-center gap-8">
+            <h1 onclick="resetFilters()" class="text-2xl font-black text-red-600 tracking-tighter uppercase italic cursor-pointer select-none">
+                Mundial<span class="text-blue-500">Play</span>
+            </h1>
+            <ul class="hidden md:flex gap-6 text-sm font-medium text-gray-300">
+                <li onclick="resetFilters()" id="nav-inicio" class="hover:text-white cursor-pointer transition text-white border-b-2 border-red-600 pb-1">Inicio</li>
+                <li onclick="setViewWatchlist(false)" id="nav-catalogo" class="hover:text-white cursor-pointer transition pb-1">Catálogo</li>
+                <li onclick="setViewWatchlist(true)" id="nav-mi-lista" class="hover:text-white cursor-pointer transition flex items-center gap-1.5 pb-1">
+                    Mi Lista 
+                    <span id="watchlist-count" class="bg-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Buscador estilizado -->
+        <div class="flex items-center gap-2.5 bg-zinc-900/90 px-4 py-2 rounded-full border border-zinc-800 focus-within:border-red-600 transition-all duration-300">
+            <span class="text-gray-400 text-xs">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar partidos, documentales..." class="bg-transparent border-none outline-none text-sm w-32 md:w-56 text-white placeholder-gray-500">
+        </div>
+    </nav>
+
+    <!-- Header / Hero principal -->
+    <header class="relative h-[60vh] w-full flex items-center px-8 md:px-16 pt-24 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <!-- Imagen real optimizada de estadio mundialista -->
+            <img src="[https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80](https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80)" alt="Estadio de fútbol lleno" class="w-full h-full object-cover opacity-30">
+            <div class="absolute inset-0 netflix-gradient"></div>
+        </div>
+        <div class="relative z-10 max-w-2xl mt-8">
+            <span class="bg-red-600/20 text-red-500 border border-red-600/30 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase">Exclusivo de Mundial Play</span>
+            <h2 class="text-5xl md:text-7xl font-black mb-4 leading-none tracking-tight mt-3">EXPLORA LA<br><span class="text-red-600">HISTORIA</span></h2>
+            <p class="text-gray-300 text-sm md:text-base leading-relaxed">Filtra, busca y guarda tus momentos favoritos del torneo más grande del planeta. Revive los goles épicos y los documentales oficiales en alta definición.</p>
+        </div>
+    </header>
+
+    <!-- Sección de catálogo principal -->
+    <main class="relative z-20 px-6 md:px-12 -mt-16">
+        <!-- Controles de filtrado y ordenamiento -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 bg-zinc-950/80 p-6 rounded-2xl border border-white/5 backdrop-blur-xl shadow-xl">
+            <!-- Categorías Dinámicas (Inyectadas por JS) -->
+            <div id="category-filters" class="flex flex-wrap gap-2.5">
+                <!-- Se autogenera dinámicamente -->
+            </div>
+
+            <!-- Ordenamiento e Info -->
+            <div class="flex items-center gap-3 self-end md:self-auto">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Ordenar:</label>
+                <select id="sort-select" class="bg-zinc-900 text-white text-xs rounded-lg px-3 py-2.5 outline-none border border-zinc-800 focus:border-red-600 transition cursor-pointer font-medium">
+                    <option value="newest">Más Recientes primero</option>
+                    <option value="oldest">Más Antiguos primero</option>
+                    <option value="az">Título (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Rejilla de Contenido Principal -->
+        <section class="mb-24">
+            <div id="main-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <!-- Inyectado dinámicamente -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Detalle Modernizado -->
+    <div id="detail-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative bg-zinc-950 w-full max-w-2xl rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl transform transition-all duration-300 scale-95 opacity-0" id="modal-container">
+            <div id="modal-body">
+                <!-- Inyectado dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Vinculación del comportamiento dinámico en JavaScript -->
+    <script src="app.js" defer></script>
+</body>
+</html>

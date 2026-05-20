@@ -1,0 +1,39 @@
+:root {
+    --stadium-red: #E20613;
+    --deep-black: #050505;
+}
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: var(--deep-black); 
+    color: white; 
+}
+
+.netflix-gradient { 
+    background: linear-gradient(to top, var(--deep-black) 0%, transparent 100%); 
+}
+
+.card-hover { 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+.card-hover:hover { 
+    transform: translateY(-6px) scale(1.03); 
+    z-index: 10; 
+    border-color: var(--stadium-red); 
+    box-shadow: 0 10px 25px -5px rgba(226, 6, 19, 0.3);
+}
+
+/* Barra de scroll personalizada y elegante */
+::-webkit-scrollbar { 
+    width: 6px; 
+}
+
+::-webkit-scrollbar-track { 
+    background: #0d0d0d; 
+}
+
+::-webkit-scrollbar-thumb { 
+    background: var(--stadium-red); 
+    border-radius: 10px; 
+}

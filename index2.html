@@ -1,0 +1,415 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundial Play | Catálogo de Leyendas</title>
+    <!-- Tailwind CSS para diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --stadium-red: #E20613;
+            --deep-black: #050505;
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--deep-black); 
+            color: white; 
+        }
+        .netflix-gradient { 
+            background: linear-gradient(to top, var(--deep-black) 0%, transparent 100%); 
+        }
+        .card-hover { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .card-hover:hover { 
+            transform: translateY(-6px) scale(1.03); 
+            z-index: 10; 
+            border-color: var(--stadium-red); 
+            box-shadow: 0 10px 25px -5px rgba(226, 6, 19, 0.3);
+        }
+        
+        /* Barra de scroll personalizada y elegante */
+        ::-webkit-scrollbar { 
+            width: 6px; 
+        }
+        ::-webkit-scrollbar-track { 
+            background: #0d0d0d; 
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--stadium-red); 
+            border-radius: 10px; 
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <!-- Navegación optimizada -->
+    <nav id="navbar" class="fixed top-0 w-full z-[100] transition-all duration-300 px-6 md:px-12 py-4 flex items-center justify-between bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div class="flex items-center gap-8">
+            <h1 onclick="resetFilters()" class="text-2xl font-black text-red-600 tracking-tighter uppercase italic cursor-pointer select-none">
+                Mundial<span class="text-blue-500">Play</span>
+            </h1>
+            <ul class="hidden md:flex gap-6 text-sm font-medium text-gray-300">
+                <li onclick="resetFilters()" id="nav-inicio" class="hover:text-white cursor-pointer transition text-white border-b-2 border-red-600 pb-1">Inicio</li>
+                <li onclick="setViewWatchlist(false)" id="nav-catalogo" class="hover:text-white cursor-pointer transition pb-1">Catálogo</li>
+                <li onclick="setViewWatchlist(true)" id="nav-mi-lista" class="hover:text-white cursor-pointer transition flex items-center gap-1.5 pb-1">
+                    Mi Lista 
+                    <span id="watchlist-count" class="bg-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Buscador estilizado -->
+        <div class="flex items-center gap-2.5 bg-zinc-900/90 px-4 py-2 rounded-full border border-zinc-800 focus-within:border-red-600 transition-all duration-300">
+            <span class="text-gray-400 text-xs">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar partidos, documentales..." class="bg-transparent border-none outline-none text-sm w-32 md:w-56 text-white placeholder-gray-500">
+        </div>
+    </nav>
+
+    <!-- Header / Hero principal -->
+    <header class="relative h-[60vh] w-full flex items-center px-8 md:px-16 pt-24 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <!-- Imagen real optimizada de estadio mundialista -->
+            <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80" alt="Estadio de fútbol lleno" class="w-full h-full object-cover opacity-30">
+            <div class="absolute inset-0 netflix-gradient"></div>
+        </div>
+        <div class="relative z-10 max-w-2xl mt-8">
+            <span class="bg-red-600/20 text-red-500 border border-red-600/30 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase">Exclusivo de Mundial Play</span>
+            <h2 class="text-5xl md:text-7xl font-black mb-4 leading-none tracking-tight mt-3">EXPLORA LA<br><span class="text-red-600">HISTORIA</span></h2>
+            <p class="text-gray-300 text-sm md:text-base leading-relaxed">Filtra, busca y guarda tus momentos favoritos del torneo más grande del planeta. Revive los goles épicos y los documentales oficiales en alta definición.</p>
+        </div>
+    </header>
+
+    <!-- Sección de catálogo principal -->
+    <main class="relative z-20 px-6 md:px-12 -mt-16">
+        <!-- Controles de filtrado y ordenamiento -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 bg-zinc-950/80 p-6 rounded-2xl border border-white/5 backdrop-blur-xl shadow-xl">
+            <!-- Categorías Dinámicas (Inyectadas por JS) -->
+            <div id="category-filters" class="flex flex-wrap gap-2.5">
+                <!-- Se autogenera dinámicamente -->
+            </div>
+
+            <!-- Ordenamiento e Info -->
+            <div class="flex items-center gap-3 self-end md:self-auto">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Ordenar:</label>
+                <select id="sort-select" class="bg-zinc-900 text-white text-xs rounded-lg px-3 py-2.5 outline-none border border-zinc-800 focus:border-red-600 transition cursor-pointer font-medium">
+                    <option value="newest">Más Recientes primero</option>
+                    <option value="oldest">Más Antiguos primero</option>
+                    <option value="az">Título (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Rejilla de Contenido Principal -->
+        <section class="mb-24">
+            <div id="main-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <!-- Inyectado dinámicamente -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Detalle Modernizado -->
+    <div id="detail-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative bg-zinc-950 w-full max-w-2xl rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl transform transition-all duration-300 scale-95 opacity-0" id="modal-container">
+            <div id="modal-body">
+                <!-- Inyectado dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos de contenido (simplificada y mejorada con imágenes reales del fútbol)
+        const DATA = [
+            { id: 1, title: "Final: Argentina vs Francia", year: 2022, category: "Partido", narrator: "Andrés Cantor", rating: 5.0, desc: "El partido de fútbol más épico de todos los tiempos. Un duelo inolvidable entre Messi y Mbappé que se definió por la vía de los penales bajo el cielo de Lusail.", thumb: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80" },
+            { id: 2, title: "Marruecos: Sueño Africano", year: 2022, category: "Documental", narrator: "FIFA Films", rating: 4.8, desc: "La hazaña histórica de la selección de Marruecos convirtiéndose en la primera selección del continente africano en alcanzar una semifinal mundialista.", thumb: "https://images.unsplash.com/photo-1510563800743-aed2364902cb?auto=format&fit=crop&w=600&q=80" },
+            { id: 3, title: "Goles de Pelé: O Rei", year: 1970, category: "Resumen", narrator: "Archivo Histórico", rating: 5.0, desc: "Un tributo cinematográfico a los mejores goles y jugadas del tres veces campeón mundial de fútbol en la mítica Copa del Mundo de México 1970.", thumb: "https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&w=600&q=80" },
+            { id: 4, title: "España: El Nacimiento de un Estilo", year: 2010, category: "Documental", narrator: "Iker Casillas", rating: 4.7, desc: "Un viaje profundo sobre el 'Tiki-Taka', el revolucionario estilo de juego que llevó a la 'Roja' a conquistar su primer campeonato del mundo en Sudáfrica.", thumb: "https://images.unsplash.com/photo-1431324155629-1a6edd1d126c?auto=format&fit=crop&w=600&q=80" },
+            { id: 5, title: "Brasil vs Alemania: El Silencio", year: 2014, category: "Partido", narrator: "Mariano Closs", rating: 4.5, desc: "El histórico resultado de 1-7 que sorprendió e impactó al planeta entero, marcando para siempre la historia del fútbol moderno en el estadio Mineirao.", thumb: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=600&q=80" },
+            { id: 6, title: "Goles de Antología de Qatar", year: 2022, category: "Resumen", narrator: "Varios narradores", rating: 4.9, desc: "La recopilación premium de las anotaciones más acrobáticas, de tiro libre y jugadas colectivas que dejaron huella en el último mundial de fútbol.", thumb: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        // Estado de la Aplicación unificado en un solo objeto reactivo de configuración
+        const state = {
+            currentCategory: "Todos",
+            searchTerm: "",
+            sortBy: "newest",
+            watchlistOnly: false, // Ahora "Mi Lista" funciona correctamente al ser un booleano de estado
+            watchlist: JSON.parse(localStorage.getItem('mundialPlayWatchlist')) || []
+        };
+
+        // Generamos categorías dinámicamente según lo que exista en la base de datos (escalabilidad pura)
+        const categories = ["Todos", ...new Set(DATA.map(item => item.category))];
+
+        /**
+         * Renderiza el componente de filtros de categoría de forma dinámica
+         */
+        function renderFilters() {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = categories.map(cat => {
+                const isActive = state.currentCategory === cat && !state.watchlistOnly;
+                const activeClass = isActive 
+                    ? "bg-red-600 text-white shadow-lg shadow-red-600/30" 
+                    : "bg-zinc-900 text-gray-300 hover:bg-zinc-800 hover:text-white";
+                
+                return `
+                    <button 
+                        onclick="setCategory('${cat}')" 
+                        class="px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 ${activeClass}">
+                        ${cat === 'Todos' ? 'Todos' : cat + 's'}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Motor de Renderizado Principal
+         */
+        function render() {
+            const grid = document.getElementById('main-grid');
+            
+            // 1. Canalizado de filtros
+            let filtered = DATA.filter(item => {
+                const matchesSearch = item.title.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
+                                     item.desc.toLowerCase().includes(state.searchTerm.toLowerCase());
+                const matchesCat = state.currentCategory === "Todos" || item.category === state.currentCategory;
+                const matchesWatchlist = !state.watchlistOnly || state.watchlist.includes(item.id);
+                
+                return matchesSearch && matchesCat && matchesWatchlist;
+            });
+
+            // 2. Ordenamiento inteligente del canalizado
+            if (state.sortBy === "az") {
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+            } else if (state.sortBy === "newest") {
+                filtered.sort((a, b) => b.year - a.year);
+            } else if (state.sortBy === "oldest") {
+                filtered.sort((a, b) => a.year - b.year);
+            }
+
+            // 3. Pintado en DOM
+            grid.innerHTML = filtered.map(item => {
+                const inList = state.watchlist.includes(item.id);
+                return `
+                    <article class="card-hover bg-zinc-950 rounded-xl overflow-hidden border border-zinc-900 group cursor-pointer flex flex-col justify-between" onclick="openModal(${item.id})">
+                        <div class="relative aspect-video overflow-hidden bg-zinc-900">
+                            <img src="${item.thumb}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            <!-- Overlay de reproducción de vídeo simulada -->
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                                <span class="bg-red-600 text-white text-xs font-bold tracking-wider px-4 py-2 rounded-full transform scale-75 group-hover:scale-100 transition duration-300">
+                                    REPRODUCIR
+                                </span>
+                            </div>
+                            <span class="absolute top-3 left-3 bg-black/75 backdrop-blur-md text-[10px] text-zinc-300 px-2 py-1 rounded font-bold uppercase tracking-widest border border-white/5">
+                                ${item.category}
+                            </span>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between">
+                            <div class="flex justify-between items-start gap-2 mb-3">
+                                <h3 class="font-extrabold text-sm text-white group-hover:text-red-500 transition duration-300 line-clamp-1">${item.title}</h3>
+                                <span class="text-xs text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">${item.year}</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-2 border-t border-white/5 pt-3">
+                                <span class="text-[11px] text-zinc-400 font-medium">⭐ ${item.rating.toFixed(1)}</span>
+                                <button 
+                                    onclick="event.stopPropagation(); toggleWatchlist(${item.id})" 
+                                    class="text-lg p-1 hover:scale-125 transition duration-200"
+                                    aria-label="${inList ? 'Quitar de favoritos' : 'Agregar a favoritos'}">
+                                    ${inList ? '❤️' : '🤍'}
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            // Estado vacío (Empty State)
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-20 flex flex-col items-center justify-center">
+                        <span class="text-5xl mb-4">⚽</span>
+                        <h4 class="text-xl font-bold text-zinc-300">No encontramos resultados</h4>
+                        <p class="text-zinc-500 text-sm mt-1 max-w-sm">Prueba ajustando tus términos de búsqueda o cambiando el filtro seleccionado.</p>
+                        ${state.watchlistOnly ? `<button onclick="resetFilters()" class="mt-4 bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-red-700 transition">Ver todo el catálogo</button>` : ''}
+                    </div>
+                `;
+            }
+
+            // Actualizar el contador global de favoritos en el header
+            document.getElementById('watchlist-count').innerText = state.watchlist.length;
+            renderFilters();
+        }
+
+        /**
+         * Manejadores de Estado Modernos
+         */
+        function setCategory(category) {
+            state.currentCategory = category;
+            state.watchlistOnly = false; // Desactivar la vista de watchlist al cambiar categoría
+            updateActiveMenuTab('catalogo');
+            render();
+        }
+
+        function setViewWatchlist(onlyWatchlist) {
+            state.watchlistOnly = onlyWatchlist;
+            if (onlyWatchlist) {
+                state.currentCategory = "Todos";
+                updateActiveMenuTab('mi-lista');
+            } else {
+                updateActiveMenuTab('catalogo');
+            }
+            render();
+        }
+
+        function resetFilters() {
+            state.currentCategory = "Todos";
+            state.watchlistOnly = false;
+            state.searchTerm = "";
+            document.getElementById('search-input').value = "";
+            updateActiveMenuTab('inicio');
+            render();
+        }
+
+        function updateActiveMenuTab(activeTabId) {
+            const tabs = {
+                inicio: document.getElementById('nav-inicio'),
+                catalogo: document.getElementById('nav-catalogo'),
+                'mi-lista': document.getElementById('nav-mi-lista')
+            };
+            
+            Object.keys(tabs).forEach(key => {
+                if (tabs[key]) {
+                    if (key === activeTabId) {
+                        tabs[key].className = "text-white border-b-2 border-red-600 pb-1 cursor-pointer font-bold";
+                    } else {
+                        tabs[key].className = "text-gray-400 hover:text-white cursor-pointer transition pb-1";
+                    }
+                }
+            });
+        }
+
+        /**
+         * Maneja de manera limpia la adición/eliminación de favoritos
+         */
+        function toggleWatchlist(id) {
+            const index = state.watchlist.indexOf(id);
+            if (index > -1) {
+                state.watchlist.splice(index, 1);
+            } else {
+                state.watchlist.push(id);
+            }
+            localStorage.setItem('mundialPlayWatchlist', JSON.stringify(state.watchlist));
+            
+            // Renderizar la grilla principal
+            render();
+            
+            // Actualizar dinámicamente el botón interno del modal si está abierto, sin reinyección agresiva
+            const modalBtn = document.getElementById(`modal-fav-btn-${id}`);
+            if (modalBtn) {
+                const inList = state.watchlist.includes(id);
+                modalBtn.innerHTML = inList ? '❤️ Quitar de la lista' : '🤍 Ver más tarde';
+            }
+        }
+
+        /**
+         * Gestión de Modales Optimizados con animaciones CSS fluidas
+         */
+        function openModal(id) {
+            const item = DATA.find(i => i.id === id);
+            const inList = state.watchlist.includes(item.id);
+            const modal = document.getElementById('detail-modal');
+            const container = document.getElementById('modal-container');
+            const body = document.getElementById('modal-body');
+
+            body.innerHTML = `
+                <div class="relative aspect-video w-full bg-black">
+                    <img src="${item.thumb}" alt="${item.title}" class="w-full h-full object-cover opacity-85">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/80 hover:bg-black text-white w-9 h-9 flex items-center justify-center rounded-full border border-white/10 hover:border-red-600 transition duration-300 font-bold" aria-label="Cerrar modal">✕</button>
+                    <div class="absolute bottom-4 left-6">
+                         <span class="bg-red-600 text-white font-extrabold px-3 py-1 rounded text-[10px] uppercase tracking-widest">${item.category}</span>
+                    </div>
+                </div>
+                <div class="p-6 md:p-8">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">${item.title}</h2>
+                        <button id="modal-fav-btn-${item.id}" onclick="toggleWatchlist(${item.id})" class="bg-zinc-900 border border-zinc-800 text-xs text-white px-4 py-2.5 rounded-full hover:bg-zinc-800 hover:border-red-600 transition flex items-center gap-2 font-bold whitespace-nowrap">
+                            ${inList ? '❤️ Quitar de la lista' : '🤍 Ver más tarde'}
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs mb-6 text-zinc-400 font-semibold">
+                        <span class="text-emerald-500">${item.year}</span>
+                        <span>•</span>
+                        <span>Calificación: ⭐ ${item.rating.toFixed(1)}</span>
+                        <span>•</span>
+                        <span class="text-zinc-500 font-normal">Narración: ${item.narrator}</span>
+                    </div>
+                    <p class="text-zinc-300 text-sm md:text-base leading-relaxed mb-6">${item.desc}</p>
+                    <button onclick="closeModal()" class="w-full bg-white text-black font-extrabold py-3.5 rounded-xl hover:bg-zinc-200 transition duration-300 tracking-wide text-xs uppercase">Cerrar Detalle</button>
+                </div>
+            `;
+
+            // Mostrar modal con transición fluida
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Prevenir scroll en la página de fondo de manera limpia
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detail-modal');
+            const container = document.getElementById('modal-container');
+
+            // Ocultar modal animando escala y opacidad
+            container.classList.remove('scale-100', 'opacity-100');
+            container.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }, 250);
+        }
+
+        /**
+         * Escuchas de eventos centralizadas y optimizadas
+         */
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            state.searchTerm = e.target.value;
+            render();
+        });
+
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            state.sortBy = e.target.value;
+            render();
+        });
+
+        // Soporte de accesibilidad: Cerrar modal con la tecla "Escape"
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Evento de scroll para efecto transparente/sólido en el navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 40) {
+                nav.classList.add('bg-black', 'py-3');
+                nav.classList.remove('bg-black/80', 'py-4');
+            } else {
+                nav.classList.add('bg-black/80', 'py-4');
+                nav.classList.remove('bg-black', 'py-3');
+            }
+        });
+
+        // Carga inicial del aplicativo
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+    </script>
+</body>
+</html>
